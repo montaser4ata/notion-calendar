@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>تقويم السنة الحي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap">
+<style>
+/* Layout: a wall calendar you cross days off with a marker — year header with a live progress rule, then a responsive grid of 12 month sheets. */
+:root{
+  --paper:#fbf6ee;      /* page */
+  --sheet:#fffdf9;      /* month card */
+  --ink:#2b2622;        /* main text */
+  --muted:#8d8278;      /* secondary text */
+  --line:#eadfd2;       /* hairlines */
+  --weekend:#f6e6d3;    /* fri/sat wash */
+  --accent:#d4702a;     /* today + current month */
+  --accent-ink:#ffffff;
+  --mark:#b9a99a;       /* crossed-off stroke */
+  --past:#b3a79c;       /* crossed-off digits */
+  --week:#5b7fae;       /* week numbers */
+  --f-display:"Readex Pro", "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+  --f-body:"Readex Pro", "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#191919; --sheet:#222120; --ink:#ece6de; --muted:#9a9089; --line:#33302d;
+    --weekend:#2e2823; --accent:#f08a3e; --accent-ink:#1b1410; --mark:#6d645c; --past:#6f665f; --week:#8fb0dc;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#191919; --sheet:#222120; --ink:#ece6de; --muted:#9a9089; --line:#33302d;
+  --weekend:#2e2823; --accent:#f08a3e; --accent-ink:#1b1410; --mark:#6d645c; --past:#6f665f; --week:#8fb0dc;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+html{background:var(--paper)}
+body{
+  background:var(--paper); color:var(--ink); font-family:var(--f-body);
+  padding-block:20px 28px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  font-variant-numeric:tabular-nums;
+}
+.wrap{max-width:1100px; margin-inline:auto; display:grid; gap:18px}
+
+/* header */
+.head{display:grid; gap:10px}
+.top{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.year{font-family:var(--f-display); font-weight:700; font-size:clamp(28px,5vw,40px); line-height:1; letter-spacing:.5px}
+.today-line{font-size:15px; color:var(--muted)}
+.today-line b{color:var(--ink); font-weight:600}
+.stats{display:flex; gap:18px; flex-wrap:wrap; font-size:14px; color:var(--muted)}
+.stats strong{color:var(--ink); font-weight:600; font-size:16px}
+.rule{position:relative; height:8px; border-radius:99px; background:var(--line); overflow:hidden}
+.rule i{position:absolute; inset-block:0; inset-inline-start:0; background:var(--accent); border-radius:99px}
+
+/* months */
+.grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(196px, 1fr)); gap:12px}
+.month{background:var(--sheet); border:1px solid var(--line); border-radius:10px; padding:10px 10px 8px; min-width:0}
+.month.now{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent) inset}
+.mhead{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px}
+.mname{font-weight:600; font-size:15px}
+.men{font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.month.now .mname{color:var(--accent)}
+.days{display:grid; grid-template-columns:1.1fr repeat(7, 1fr); gap:2px 0; text-align:center}
+.dow{font-size:10.5px; color:var(--muted); padding-bottom:3px}
+.dow.wk{color:var(--week); font-size:9.5px}
+.wn{font-size:10px; color:var(--week); align-self:center; opacity:.85}
+.d{position:relative; font-size:12px; line-height:22px; height:22px}
+.d.we{background:var(--weekend)}
+.d.we.first{border-start-start-radius:5px; border-end-start-radius:5px}
+.d.we.last{border-start-end-radius:5px; border-end-end-radius:5px}
+.d.empty{background:transparent}
+.d.past{color:var(--past)}
+.d.past::after{
+  content:""; position:absolute; inset:3px 4px;
+  background:linear-gradient(to top left, transparent calc(50% - .8px), var(--mark) calc(50% - .8px), var(--mark) calc(50% + .8px), transparent calc(50% + .8px));
+  pointer-events:none;
+}
+.d.today span{
+  display:inline-grid; place-items:center; width:22px; height:22px; border-radius:50%;
+  background:var(--accent); color:var(--accent-ink); font-weight:700;
+}
+.legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--muted); align-items:center}
+.legend span{display:inline-flex; gap:6px; align-items:center}
+.sw{width:14px; height:14px; border-radius:3px; display:inline-block; position:relative}
+.sw.t{border-radius:50%; background:var(--accent)}
+.sw.p{background:linear-gradient(to top left, transparent calc(50% - .8px), var(--mark) calc(50% - .8px), var(--mark) calc(50% + .8px), transparent calc(50% + .8px)); border:1px solid var(--line)}
+.sw.w{background:var(--weekend)}
+@media (prefers-reduced-motion: no-preference){ .rule i{transition:width .6s ease} }
+</style>
+</head>
+<body>
+
+<div class="wrap" dir="rtl" lang="ar">
+  <header class="head">
+    <div class="top">
+      <div class="year" id="year">2026</div>
+      <div class="today-line" id="todayLine"></div>
+    </div>
+    <div class="rule" aria-hidden="true"><i id="bar" style="width:0"></i></div>
+    <div class="stats" id="stats"></div>
+  </header>
+  <main class="grid" id="grid"></main>
+  <div class="legend">
+    <span><i class="sw t"></i>اليوم</span>
+    <span><i class="sw p"></i>يوم مضى</span>
+    <span><i class="sw w"></i>جمعة وسبت</span>
+    <span style="color:var(--week)">الرقم الأزرق = رقم الأسبوع</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  const AR = ["كانون الثاني","شباط","آذار","نيسان","أيار","حزيران","تموز","آب","أيلول","تشرين الأول","تشرين الثاني","كانون الأول"];
+  const EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const DAYS = ["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+  const DOW = ["ح","ن","ث","ر","خ","ج","س"]; // Sun..Sat
+
+  const DAY = 86400000;
+  const ymd = (y,m,d) => Date.UTC(y,m,d);
+
+  // Week 1 = the Sunday-start week that contains 1 January (matches the notebook's weeks map).
+  function weekNo(y,m,d){
+    const jan1 = new Date(ymd(y,0,1));
+    const start = ymd(y,0,1) - jan1.getUTCDay()*DAY;
+    return Math.floor((ymd(y,m,d) - start)/DAY/7) + 1;
+  }
+
+  function render(){
+    const now = new Date();
+    const Y = now.getFullYear(), M = now.getMonth(), D = now.getDate();
+    const todayKey = ymd(Y,M,D);
+    const isLeap = (Y%4===0 && Y%100!==0) || Y%400===0;
+    const total = isLeap ? 366 : 365;
+    const dayOfYear = Math.round((todayKey - ymd(Y,0,1))/DAY) + 1;
+    const left = total - dayOfYear;
+    const pct = Math.round(dayOfYear/total*100);
+
+    document.getElementById("year").textContent = Y;
+    document.getElementById("todayLine").innerHTML =
+      "اليوم <b>" + DAYS[now.getDay()] + " " + D + " " + AR[M] + "</b>";
+    document.getElementById("stats").innerHTML =
+      "<span>اليوم <strong>" + dayOfYear + "</strong> من " + total + "</span>" +
+      "<span>مضى <strong dir=\"ltr\">" + pct + "%</strong> من السنة</span>" +
+      "<span>باقي <strong>" + left + "</strong> يوم</span>" +
+      "<span>الأسبوع <strong>" + weekNo(Y,M,D) + "</strong></span>";
+    requestAnimationFrame(()=>{ document.getElementById("bar").style.width = (dayOfYear/total*100).toFixed(2) + "%"; });
+
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    for(let m=0; m<12; m++){
+      const sec = document.createElement("section");
+      sec.className = "month" + (m===M ? " now" : "");
+      sec.setAttribute("aria-label", AR[m] + " " + Y);
+      let h = '<div class="mhead"><span class="mname">' + AR[m] + '</span><span class="men">' + EN[m] + '</span></div>';
+      h += '<div class="days"><div class="dow wk">أسبوع</div>';
+      for(const x of DOW) h += '<div class="dow">' + x + '</div>';
+      const first = new Date(ymd(Y,m,1)).getUTCDay();
+      const dim = new Date(Date.UTC(Y,m+1,0)).getUTCDate();
+      let cell = 0;
+      for(let d=1-first; d<=dim; ){
+        // one row = week number + 7 cells
+        const anchor = Math.max(d,1);
+        h += '<div class="wn">' + weekNo(Y,m,anchor) + '</div>';
+        for(let c=0; c<7; c++, d++){
+          const we = (c===5 || c===6);
+          if(d<1 || d>dim){ h += '<div class="d empty"></div>'; continue; }
+          const key = ymd(Y,m,d);
+          let cls = "d" + (we ? " we" : "") + (c===5 ? " first" : "") + (c===6 ? " last" : "");
+          if(key < todayKey) cls += " past";
+          else if(key === todayKey) cls += " today";
+          h += '<div class="' + cls + '"><span>' + d + '</span></div>';
+        }
+        cell++;
+      }
+      h += '</div>';
+      sec.innerHTML = h;
+      grid.appendChild(sec);
+    }
+  }
+
+  render();
+  // Re-render just after midnight, and whenever the page becomes visible again.
+  function scheduleMidnight(){
+    const n = new Date();
+    const next = new Date(n.getFullYear(), n.getMonth(), n.getDate()+1, 0, 0, 5);
+    setTimeout(()=>{ render(); scheduleMidnight(); }, next - n);
+  }
+  scheduleMidnight();
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) render(); });
+})();
+</script>
+</body>
+</html>
